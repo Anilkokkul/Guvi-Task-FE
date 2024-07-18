@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const [userDetails, setUserDetails] = useState({
     name: "",
     mobileNumber: "",
@@ -12,17 +15,32 @@ const Register = () => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (
-      !userDetails.name ||
-      !userDetails.email ||
-      userDetails.mobileNumber ||
-      !userDetails.password
-    ) {
-      return alert("Please fill all the fields");
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      if (
+        !userDetails.name ||
+        !userDetails.email ||
+        !userDetails.mobileNumber ||
+        !userDetails.password
+      ) {
+        return alert("Please fill all the fields");
+      }
+      const res = await axios.post(
+        "http://localhost:5000/register",
+        userDetails
+      );
+      alert(res.data.message);
+      setUserDetails({ name: "", mobileNumber: "", email: "", password: "" });
+    } catch (error) {
+      alert(error.response.data.message);
+      if (
+        error.response.data.message ===
+        "User already exist with the given Email Id"
+      ) {
+        navigate("/login");
+      }
     }
-    console.log(userDetails);
   };
 
   return (

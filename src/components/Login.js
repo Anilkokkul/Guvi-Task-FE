@@ -1,8 +1,9 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState({
     email: "",
     password: "",
@@ -11,15 +12,24 @@ const Login = () => {
     setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
   };
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!userDetails.email || !userDetails.password) {
-      return alert("Please fill all the fields");
+    try {
+      e.preventDefault();
+      if (!userDetails.email || !userDetails.password) {
+        return alert("Please fill all the fields");
+      }
+      const res = await axios.post("http://localhost:5000/login", userDetails, {
+        withCredentials: true,
+      });
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      alert(res.data.message);
+      navigate("/dashboard");
+      setUserDetails({
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      alert(error.response.data.message);
     }
-    const res = await axios.post("http://localhost:5000/login", userDetails);
-
-    console.log(res.data);
-
-    console.log(userDetails);
   };
   return (
     <>
